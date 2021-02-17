@@ -46,7 +46,7 @@ int main (int argc, char **argv)
     //  If command is `history` print previous N commands
     //  For all other commands, check if an executable by that name is in one of the PATH directories
     //   If yes, execute it
-    //   If no, print error statement: "<command_name>: Error running command" (do include newline)
+    //   If no, print error statement: "<command_name>: Error command not found" (do include newline)
 
     // Free allocated memory
     freeArrayOfCharArrays(os_path_list, 16);
