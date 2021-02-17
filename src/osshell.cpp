@@ -4,6 +4,7 @@
 #include <cstring>
 #include <sstream>
 #include <vector>
+#include <unistd.h>
 
 void allocateArrayOfCharArrays(char ***array_ptr, size_t array_length, size_t item_size);
 void freeArrayOfCharArrays(char **array, size_t array_length);
