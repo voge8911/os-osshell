@@ -12,10 +12,10 @@ void splitString(std::string text, char d, char **result);
 int main (int argc, char **argv)
 {
     // Get list of paths to binary executables
-    // `os_path_list` supports up to 32 directories in PATH, 
-    //     each with a directory name length of up to 128 characters
+    // `os_path_list` supports up to 16 directories in PATH, 
+    //     each with a directory name length of up to 64 characters
     char **os_path_list;
-    allocateArrayOfCharArrays(&os_path_list, 32, 128);
+    allocateArrayOfCharArrays(&os_path_list, 16, 64);
     char* os_path = getenv("PATH");
     splitString(os_path, ':', os_path_list);
 
@@ -32,6 +32,12 @@ int main (int argc, char **argv)
     // Welcome message
     printf("Welcome to OSShell! Please enter your commands ('exit' to quit).\n");
 
+    // Allocate space for input command lists
+    // `command_list` supports up to 32 command line parameters, 
+    //     each with a parameter string length of up to 128 characters
+    char **command_list;
+    allocateArrayOfCharArrays(&command_list, 32, 128);
+
     // Repeat:
     //  Print prompt for user input: "osshell> " (no newline)
     //  Get user input for next command
@@ -42,7 +48,8 @@ int main (int argc, char **argv)
     //   If no, print error statement: "<command_name>: Error running command" (do include newline)
 
     // Free allocated memory
-    freeArrayOfCharArrays(os_path_list, 32);
+    freeArrayOfCharArrays(os_path_list, 16);
+    freeArrayOfCharArrays(command_list, 32);
 
     return 0;
 }
