@@ -1,0 +1,5 @@
+which grep
+history
+exit
+history
+exit
