@@ -5,6 +5,7 @@
 #include <sstream>
 #include <vector>
 #include <unistd.h>
+#include <stdlib.h>
 
 void allocateArrayOfCharArrays(char ***array_ptr, size_t array_length, size_t item_size);
 void freeArrayOfCharArrays(char **array, size_t array_length);
@@ -40,19 +41,35 @@ int main (int argc, char **argv)
     allocateArrayOfCharArrays(&command_list, 32, 128);
 
     // Repeat:
-    //  Print prompt for user input: "osshell> " (no newline)
-    //  Get user input for next command
-    //  If command is `exit` exit loop / quit program
-    //  If command is `history` print previous N commands
-    //  For all other commands, check if an executable by that name is in one of the PATH directories
-    //   If yes, execute it
-    //   If no, print error statement: "<command_name>: Error command not found" (do include newline)
+    while(1){
+        //  Print prompt for user input: "osshell> " (no newline)
+        std::cout << "osshell> ";
+        //  Get user input for next command
+        std::string user_input;
+        std::cin >> user_input;
+        //  If command is `exit` exit loop / quit program
+        if(user_input.compare("exit") == 0){
+            break; //exit the loop
+        }
+        //  If command is `history` print previous N commands
+        else if(user_input.compare("history")==0){
+            for(int i =0; i<32; i++){
+                std::cout << command_list[i];
+            }
+        }else{
+            char input[];
 
+        }
+        //  For all other commands, check if an executable by that name is in one of the PATH directories
+        //   If yes, execute it
+        //   If no, print error statement: "<command_name>: Error command not found" (do include newline)
+    }
     // Free allocated memory
     freeArrayOfCharArrays(os_path_list, 16);
     freeArrayOfCharArrays(command_list, 32);
 
     return 0;
+    
 }
 
 /*
