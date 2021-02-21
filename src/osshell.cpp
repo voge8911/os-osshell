@@ -57,7 +57,7 @@ int main (int argc, char **argv)
                 std::cout << command_list[i];
             }
         }else{
-            char input[];
+            //[]; run getenv command here 
 
         }
         //  For all other commands, check if an executable by that name is in one of the PATH directories
