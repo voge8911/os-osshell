@@ -6,6 +6,7 @@
 #include <vector>
 #include <unistd.h>
 #include <stdlib.h>
+#include <string.h>
 
 void allocateArrayOfCharArrays(char ***array_ptr, size_t array_length, size_t item_size);
 void freeArrayOfCharArrays(char **array, size_t array_length);
@@ -18,18 +19,19 @@ int main (int argc, char **argv)
     //     each with a directory name length of up to 64 characters
     char **os_path_list;
     allocateArrayOfCharArrays(&os_path_list, 16, 64);
-    char* os_path = getenv("PATH");
-    splitString(os_path, ':', os_path_list);
+    //char* os_path = getenv("PATH");
+    //splitString(os_path, ':', os_path_list);
 
 
     // Example code for how to loop over NULL terminated list of strings
+    /*
     int i = 0;
     while (os_path_list[i] != NULL)
     {
         printf("PATH[%2d]: %s\n", i, os_path_list[i]);
         i++;
     }
-
+    */
 
     // Welcome message
     printf("Welcome to OSShell! Please enter your commands ('exit' to quit).\n");
@@ -40,29 +42,52 @@ int main (int argc, char **argv)
     char **command_list;
     allocateArrayOfCharArrays(&command_list, 32, 128);
 
-    // Repeat:
-    while(1){
+    // Repeat:cd 
+    int j = 0;
+    while(1)
+    {
         //  Print prompt for user input: "osshell> " (no newline)
+
         std::cout << "osshell> ";
-        //  Get user input for next command
-        std::string user_input;
-        std::cin >> user_input;
+        
+        fgets(command_list[j], 128, stdin);
+        
+        //splitString(user_input, ' ', command_list); //split up userinput by spaces
+        //std::cout << "Command list at j : " << command_list[j] << std::endl;
+        
+        if (strcmp(command_list[j],"\n") == 0)
+        {
+            continue;
+        }
+        
+        printf("here 1 %s\n", command_list[j]);
         //  If command is `exit` exit loop / quit program
-        if(user_input.compare("exit") == 0){
+        if (strcmp(command_list[j],"exit") == 0){
             break; //exit the loop
         }
         //  If command is `history` print previous N commands
-        else if(user_input.compare("history")==0){
-            for(int i =0; i<32; i++){
-                std::cout << command_list[i];
+        if (strcmp(command_list[j],"history")==0){
+            for(int i = 0; i < j; i++)
+            {
+                std::cout << i << ": " << command_list[i] << std::endl;
             }
         }else{
-            //[]; run getenv command here 
-
-        }
+            //[]; run getenv command here
+            if(getenv(command_list[0]) == NULL) {
+				std::cout << command_list[0] << ": Error command not found \n";
+			}else
+                {
+                    
+                    //std::cout << execv(os_path_list, command_list);
+				}
+		}
         //  For all other commands, check if an executable by that name is in one of the PATH directories
         //   If yes, execute it
         //   If no, print error statement: "<command_name>: Error command not found" (do include newline)
+
+
+
+        j++;
     }
     // Free allocated memory
     freeArrayOfCharArrays(os_path_list, 16);
