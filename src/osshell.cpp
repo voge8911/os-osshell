@@ -47,43 +47,48 @@ int main (int argc, char **argv)
     while(1)
     {
         //  Print prompt for user input: "osshell> " (no newline)
+        std::string input;
+        printf("osshell> ");
+        std::getline(std::cin, input);
 
-        std::cout << "osshell> ";
-        
-        fgets(command_list[j], 128, stdin);
+        strcpy(command_list[j], input.c_str());
         
         //splitString(user_input, ' ', command_list); //split up userinput by spaces
         //std::cout << "Command list at j : " << command_list[j] << std::endl;
         
-        if (strcmp(command_list[j],"\n") == 0)
+        if (input.empty())
         {
             continue;
         }
-        
-        printf("here 1 %s\n", command_list[j]);
         //  If command is `exit` exit loop / quit program
-        if (strcmp(command_list[j],"exit") == 0){
+        if (input.compare("exit") == 0)
+        {
             break; //exit the loop
         }
         //  If command is `history` print previous N commands
-        if (strcmp(command_list[j],"history")==0){
-            for(int i = 0; i < j; i++)
+        else if (input.compare("history") == 0)
+        {
+            for(int i = 0; i <= j; i++)
             {
-                std::cout << i << ": " << command_list[i] << std::endl;
+                printf("  %d: %s\n", i, command_list[i]);
             }
-        }else{
-            //[]; run getenv command here
-            if(getenv(command_list[0]) == NULL) {
-				std::cout << command_list[0] << ": Error command not found \n";
-			}else
+        }
+        //  For all other commands, check if an executable by that name is in one of the PATH directories
+        //   If yes, execute it
+        //   If no, print error statement: "<command_name>: Error command not found" (do include newline)
+        else
+        {   //[]; run getenv command here
+            if(getenv(command_list[0]) == NULL) 
+            {
+				std::cout << command_list[j] << ": Error command not found \n";
+			}
+            else
                 {
                     
                     //std::cout << execv(os_path_list, command_list);
 				}
 		}
-        //  For all other commands, check if an executable by that name is in one of the PATH directories
-        //   If yes, execute it
-        //   If no, print error statement: "<command_name>: Error command not found" (do include newline)
+        
 
 
 
