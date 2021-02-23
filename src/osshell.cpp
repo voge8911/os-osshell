@@ -7,6 +7,8 @@
 #include <unistd.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/stat.h>
+#include <sys/wait.h>
 
 void allocateArrayOfCharArrays(char ***array_ptr, size_t array_length, size_t item_size);
 void freeArrayOfCharArrays(char **array, size_t array_length);
@@ -19,8 +21,8 @@ int main (int argc, char **argv)
     //     each with a directory name length of up to 64 characters
     char **os_path_list;
     allocateArrayOfCharArrays(&os_path_list, 16, 64);
-    //char* os_path = getenv("PATH");
-    //splitString(os_path, ':', os_path_list);
+    char* os_path = getenv("PATH");
+    splitString(os_path, ':', os_path_list);
 
 
     // Example code for how to loop over NULL terminated list of strings
@@ -42,19 +44,16 @@ int main (int argc, char **argv)
     char **command_list;
     allocateArrayOfCharArrays(&command_list, 32, 128);
 
+    struct stat sb;
     // Repeat:cd 
-    int j = 0;
+    int size = 0;
     while(1)
     {
         //  Print prompt for user input: "osshell> " (no newline)
         std::string input;
         printf("osshell> ");
         std::getline(std::cin, input);
-
-        strcpy(command_list[j], input.c_str());
-        
-        //splitString(user_input, ' ', command_list); //split up userinput by spaces
-        //std::cout << "Command list at j : " << command_list[j] << std::endl;
+        strcpy(command_list[size], input.c_str());
         
         if (input.empty())
         {
@@ -68,31 +67,52 @@ int main (int argc, char **argv)
         //  If command is `history` print previous N commands
         else if (input.compare("history") == 0)
         {
-            for(int i = 0; i <= j; i++)
+            for(int i = 0; i < size; i++)
             {
-                printf("  %d: %s\n", i, command_list[i]);
+                printf("  %d: %s\n", i + 1, command_list[i]);
             }
         }
-        //  For all other commands, check if an executable by that name is in one of the PATH directories
+        //   For all other commands, check if an executable by that name is in one of the PATH directories
         //   If yes, execute it
         //   If no, print error statement: "<command_name>: Error command not found" (do include newline)
         else
-        {   //[]; run getenv command here
-            if(getenv(command_list[0]) == NULL) 
-            {
-				std::cout << command_list[j] << ": Error command not found \n";
+        {   
+            char *args[] = {command_list[size], NULL};
+            char *exec;
+            bool is_file = false;
+            int i = 0;
+            while (os_path_list[i] != NULL)
+            {   
+                exec = new char[128];
+                sprintf(exec, "%s/%s", os_path_list[i], input.c_str());
+                if (stat(exec, &sb) != -1)
+                {
+                    is_file = true;
+                    break;
+                }
+                i++;
+            }
+            if (is_file) 
+            {   // fork
+                int pid = fork();
+                //child process
+                if (pid == 0)
+                {
+                   execv(exec, args); 
+                }
+                //parent process
+                else
+                {
+                    int status;
+                    waitpid(pid, &status, 0);
+                }
 			}
             else
-                {
-                    
-                    //std::cout << execv(os_path_list, command_list);
-				}
+            {
+                std::cout << command_list[size] << ": Error command not found \n";
+			}
 		}
-        
-
-
-
-        j++;
+        size++;
     }
     // Free allocated memory
     freeArrayOfCharArrays(os_path_list, 16);
@@ -138,12 +158,56 @@ void freeArrayOfCharArrays(char **array, size_t array_length)
 */
 void splitString(std::string text, char d, char **result)
 {
+    enum states { NONE, IN_WORD, IN_STRING } state = NONE;
+
     int i;
     std::vector<std::string> list;
-    std::stringstream ss(text);
+
     std::string token;
-    
-    while (std::getline(ss, token, d))
+    for (i = 0; i < text.length(); i++)
+    {
+        char c = text[i];
+        switch (state) {
+            case NONE:
+                if (c != d)
+                {
+                    if (c == '\"')
+                    {
+                        state = IN_STRING;
+                        token = "";
+                    }
+                    else
+                    {
+                        state = IN_WORD;
+                        token = c;
+                    }
+                }
+                break;
+            case IN_WORD:
+                if (c == d)
+                {
+                    list.push_back(token);
+                    state = NONE;
+                }
+                else
+                {
+                    token += c;
+                }
+                break;
+            case IN_STRING:
+                if (c == '\"')
+                {
+                    list.push_back(token);
+                    state = NONE;
+                }
+                else
+                {
+                    token += c;
+                }
+                break;
+        }
+    }
+    if (state != NONE)
     {
         list.push_back(token);
     }
