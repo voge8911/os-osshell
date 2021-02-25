@@ -6,10 +6,9 @@
 #include <vector>
 #include <unistd.h>
 
-void allocateArrayOfCharArrays(char ***array_ptr, size_t array_length, size_t item_size);
-void freeArrayOfCharArrays(char **array, size_t array_length);
 void splitString(std::string text, char d, std::vector<std::string>& result);
-void vectorOfStringsToArrayOfCharArrays(std::vector<std::string>& list, char **result);
+void vectorOfStringsToArrayOfCharArrays(std::vector<std::string>& list, char ***result);
+void freeArrayOfCharArrays(char **array, size_t array_length);
 
 int main (int argc, char **argv)
 {
@@ -18,19 +17,26 @@ int main (int argc, char **argv)
     char* os_path = getenv("PATH");
     splitString(os_path, ':', os_path_list);
 
-    // Example code - remove in actual program
+    
+    /************************************************************************************
+     *   Example code - remove in actual program                                        *
+     ************************************************************************************/
     // Shows how to loop over the directories in the PATH environment variable
     int i;
     for (i = 0; i < os_path_list.size(); i++)
     {
         printf("PATH[%2d]: %s\n", i, os_path_list[i].c_str());
     }
+    /************************************************************************************
+     *   End example code                                                               *
+     ************************************************************************************/
 
 
     // Welcome message
     printf("Welcome to OSShell! Please enter your commands ('exit' to quit).\n");
 
     std::vector<std::string> command_list; // to store command user types in, split into its variour parameters
+    char **command_list_exec; // command_list converted to an array of character arrays
     // Repeat:
     //  Print prompt for user input: "osshell> " (no newline)
     //  Get user input for next command
@@ -41,56 +47,50 @@ int main (int argc, char **argv)
     //   If no, print error statement: "<command_name>: Error command not found" (do include newline)
 
 
-    // Example code - remove in actual program
+    /************************************************************************************
+     *   Example code - remove in actual program                                        *
+     ************************************************************************************/
     // Shows how to split a command and prepare for the execv() function
     std::string example_command = "ls -lh";
     splitString(example_command, ' ', command_list);
-    char **command_list_exec;
-    allocateArrayOfCharArrays(&command_list_exec, command_list.size() + 1, 128);
-    vectorOfStringsToArrayOfCharArrays(command_list, command_list_exec);
-    // use `command_list_exec` in the execv() function
+    vectorOfStringsToArrayOfCharArrays(command_list, &command_list_exec);
+    // use `command_list_exec` in the execv() function rather than looping and printing
+    i = 0;
+    while (command_list_exec[i] != NULL)
+    {
+        printf("CMD[%2d]: %s\n", i, command_list_exec[i]);
+        i++;
+    }
+    // free memory for `command_list_exec`
     freeArrayOfCharArrays(command_list_exec, command_list.size() + 1);
+    printf("------\n");
+
+    // Second example command - reuse the `command_list` and `command_list_exec` variables
+    example_command = "echo \"Hello world\" I am alive!";
+    splitString(example_command, ' ', command_list);
+    vectorOfStringsToArrayOfCharArrays(command_list, &command_list_exec);
+    // use `command_list_exec` in the execv() function rather than looping and printing
+    i = 0;
+    while (command_list_exec[i] != NULL)
+    {
+        printf("CMD[%2d]: %s\n", i, command_list_exec[i]);
+        i++;
+    }
+    // free memory for `command_list_exec`
+    freeArrayOfCharArrays(command_list_exec, command_list.size() + 1);
+    printf("------\n");
+    /************************************************************************************
+     *   End example code                                                               *
+     ************************************************************************************/
 
 
     return 0;
 }
 
 /*
-   array_ptr: pointer to list of strings to be allocated
-   array_length: number of strings to allocate space for in the list
-   item_size: length of each string to allocate space for
-*/
-void allocateArrayOfCharArrays(char ***array_ptr, size_t array_length, size_t item_size)
-{
-    int i;
-    *array_ptr = new char*[array_length];
-    for (i = 0; i < array_length; i++)
-    {
-        (*array_ptr)[i] = new char[item_size];
-    }
-}
-
-/*
-   array: list of strings to be freed
-   array_length: number of strings in the list to free
-*/
-void freeArrayOfCharArrays(char **array, size_t array_length)
-{
-    int i;
-    for (i = 0; i < array_length; i++)
-    {
-        if (array[i] != NULL)
-        {
-            delete[] array[i];
-        }
-    }
-    delete[] array;
-}
-
-/*
    text: string to split
    d: character delimiter to split `text` on
-   result: NULL terminated list of strings (char **) - result will be stored here
+   result: vector of strings - result will be stored here
 */
 void splitString(std::string text, char d, std::vector<std::string>& result)
 {
@@ -148,13 +148,36 @@ void splitString(std::string text, char d, std::vector<std::string>& result)
     }
 }
 
-void vectorOfStringsToArrayOfCharArrays(std::vector<std::string>& list, char **result)
+/*
+   list: vector of strings to convert to an array of character arrays
+   result: pointer to an array of character arrays when the vector of strings is copied to
+*/
+void vectorOfStringsToArrayOfCharArrays(std::vector<std::string>& list, char ***result)
 {
     int i;
+    int result_length = list.size() + 1;
+    *result = new char*[result_length];
     for (i = 0; i < list.size(); i++)
     {
-        strcpy(result[i], list[i].c_str());
+        (*result)[i] = new char[list[i].length() + 1];
+        strcpy((*result)[i], list[i].c_str());
     }
-    delete[] result[list.size()];
-    result[list.size()] = NULL;
+    (*result)[list.size()] = NULL;
+}
+
+/*
+   array: list of strings (array of character arrays) to be freed
+   array_length: number of strings in the list to free
+*/
+void freeArrayOfCharArrays(char **array, size_t array_length)
+{
+    int i;
+    for (i = 0; i < array_length; i++)
+    {
+        if (array[i] != NULL)
+        {
+            delete[] array[i];
+        }
+    }
+    delete[] array;
 }
