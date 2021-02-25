@@ -8,37 +8,29 @@
 
 void allocateArrayOfCharArrays(char ***array_ptr, size_t array_length, size_t item_size);
 void freeArrayOfCharArrays(char **array, size_t array_length);
-void splitString(std::string text, char d, char **result);
+void splitString(std::string text, char d, std::vector<std::string>& result);
+void vectorOfStringsToArrayOfCharArrays(std::vector<std::string>& list, char **result);
 
 int main (int argc, char **argv)
 {
     // Get list of paths to binary executables
-    // `os_path_list` supports up to 16 directories in PATH, 
-    //     each with a directory name length of up to 64 characters
-    char **os_path_list;
-    allocateArrayOfCharArrays(&os_path_list, 16, 64);
+    std::vector<std::string> os_path_list;
     char* os_path = getenv("PATH");
     splitString(os_path, ':', os_path_list);
 
-
-    // Example code for how to loop over NULL terminated list of strings
-    int i = 0;
-    while (os_path_list[i] != NULL)
+    // Example code - remove in actual program
+    // Shows how to loop over the directories in the PATH environment variable
+    int i;
+    for (i = 0; i < os_path_list.size(); i++)
     {
-        printf("PATH[%2d]: %s\n", i, os_path_list[i]);
-        i++;
+        printf("PATH[%2d]: %s\n", i, os_path_list[i].c_str());
     }
 
 
     // Welcome message
     printf("Welcome to OSShell! Please enter your commands ('exit' to quit).\n");
 
-    // Allocate space for input command lists
-    // `command_list` supports up to 32 command line parameters, 
-    //     each with a parameter string length of up to 128 characters
-    char **command_list;
-    allocateArrayOfCharArrays(&command_list, 32, 128);
-
+    std::vector<std::string> command_list; // to store command user types in, split into its variour parameters
     // Repeat:
     //  Print prompt for user input: "osshell> " (no newline)
     //  Get user input for next command
@@ -48,9 +40,17 @@ int main (int argc, char **argv)
     //   If yes, execute it
     //   If no, print error statement: "<command_name>: Error command not found" (do include newline)
 
-    // Free allocated memory
-    freeArrayOfCharArrays(os_path_list, 16);
-    freeArrayOfCharArrays(command_list, 32);
+
+    // Example code - remove in actual program
+    // Shows how to split a command and prepare for the execv() function
+    std::string example_command = "ls -lh";
+    splitString(example_command, ' ', command_list);
+    char **command_list_exec;
+    allocateArrayOfCharArrays(&command_list_exec, command_list.size() + 1, 128);
+    vectorOfStringsToArrayOfCharArrays(command_list, command_list_exec);
+    // use `command_list_exec` in the execv() function
+    freeArrayOfCharArrays(command_list_exec, command_list.size() + 1);
+
 
     return 0;
 }
@@ -79,7 +79,10 @@ void freeArrayOfCharArrays(char **array, size_t array_length)
     int i;
     for (i = 0; i < array_length; i++)
     {
-        delete[] array[i];
+        if (array[i] != NULL)
+        {
+            delete[] array[i];
+        }
     }
     delete[] array;
 }
@@ -89,13 +92,13 @@ void freeArrayOfCharArrays(char **array, size_t array_length)
    d: character delimiter to split `text` on
    result: NULL terminated list of strings (char **) - result will be stored here
 */
-void splitString(std::string text, char d, char **result)
+void splitString(std::string text, char d, std::vector<std::string>& result)
 {
     enum states { NONE, IN_WORD, IN_STRING } state = NONE;
 
     int i;
-    std::vector<std::string> list;
     std::string token;
+    result.clear();
     for (i = 0; i < text.length(); i++)
     {
         char c = text[i];
@@ -118,7 +121,7 @@ void splitString(std::string text, char d, char **result)
             case IN_WORD:
                 if (c == d)
                 {
-                    list.push_back(token);
+                    result.push_back(token);
                     state = NONE;
                 }
                 else
@@ -129,7 +132,7 @@ void splitString(std::string text, char d, char **result)
             case IN_STRING:
                 if (c == '\"')
                 {
-                    list.push_back(token);
+                    result.push_back(token);
                     state = NONE;
                 }
                 else
@@ -141,12 +144,17 @@ void splitString(std::string text, char d, char **result)
     }
     if (state != NONE)
     {
-        list.push_back(token);
+        result.push_back(token);
     }
+}
 
+void vectorOfStringsToArrayOfCharArrays(std::vector<std::string>& list, char **result)
+{
+    int i;
     for (i = 0; i < list.size(); i++)
     {
         strcpy(result[i], list[i].c_str());
     }
+    delete[] result[list.size()];
     result[list.size()] = NULL;
 }
