@@ -71,27 +71,16 @@ int main (int argc, char **argv)
         //  Print prompt for user input: "osshell> " (no newline)
         std::string input;
         printf("osshell> ");
-<<<<<<< HEAD
         // get user input
         std::getline(std::cin, input);
         // put input into history list
         splitString(input, ' ',hist_arg_list);
         // store first characater of input in variable
         std::string firstChar = input.substr(0, 1);
-=======
-        std::getline(std::cin, input);
-
-        strcpy(command_list[j], input.c_str());
-        
-        //splitString(user_input, ' ', command_list); //split up userinput by spaces
-        //std::cout << "Command list at j : " << command_list[j] << std::endl;
-        
->>>>>>> history and exit commmands working
         if (input.empty())
         {
             continue;
         }
-<<<<<<< HEAD
         // Check if the first char of input is a `.` or a `/`
         else if (firstChar.compare(".") == 0 || firstChar.compare("/") == 0)
         {   
@@ -120,17 +109,10 @@ int main (int argc, char **argv)
             {
                 std::cout << command_list[size] << ": Error command not found \n";
             }
-=======
-        //  If command is `exit` exit loop / quit program
-        if (input.compare("exit") == 0)
-        {
-            break; //exit the loop
->>>>>>> history and exit commmands working
         }
         //  If command is `history` print previous N commands
         else if (input.compare("history") == 0)
         {
-<<<<<<< HEAD
             // copy user input to list of commands
             strcpy(command_list[size], input.c_str());
             for(int i = 0; i < size; i++)
@@ -254,33 +236,6 @@ int main (int argc, char **argv)
         // Free allocated memory
         freeArrayOfCharArrays(arg_list, 10);
         freeArrayOfCharArrays(hist_arg_list, 10);
-=======
-            for(int i = 0; i <= j; i++)
-            {
-                printf("  %d: %s\n", i, command_list[i]);
-            }
-        }
-        //  For all other commands, check if an executable by that name is in one of the PATH directories
-        //   If yes, execute it
-        //   If no, print error statement: "<command_name>: Error command not found" (do include newline)
-        else
-        {   //[]; run getenv command here
-            if(getenv(command_list[0]) == NULL) 
-            {
-				std::cout << command_list[j] << ": Error command not found \n";
-			}
-            else
-                {
-                    
-                    //std::cout << execv(os_path_list, command_list);
-				}
-		}
-        
-
-
-
-        j++;
->>>>>>> history and exit commmands working
     }
     // Free allocated memory
     freeArrayOfCharArrays(os_path_list, 16);
