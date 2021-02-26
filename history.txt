@@ -1,5 +1,3 @@
-which grep
-history
-exit
-history
+head -n 1 Makefile
+history 1
 exit
