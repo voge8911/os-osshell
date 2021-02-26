@@ -119,12 +119,6 @@ int main (int argc, char **argv)
             {
                 printf("  %d: %s\n", i + 1, command_list[i]);
             }
-<<<<<<< HEAD
-=======
-        }else{
-            //[]; run getenv command here 
-
->>>>>>> fixes
         }
         // If input is `history` + ` ` + `argument` check for valid argument
         else if (strcmp(hist_arg_list[0],"history") == 0)
