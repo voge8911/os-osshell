@@ -77,7 +77,8 @@ int main (int argc, char **argv)
         splitString(input, ' ',hist_arg_list);
         // store first characater of input in variable
         std::string firstChar = input.substr(0, 1);
-        if (input.empty())
+        //if input is nothing or just spaces reprompt user
+        if (input.empty() || hist_arg_list[0] == NULL)
         {
             continue;
         }
@@ -121,7 +122,7 @@ int main (int argc, char **argv)
             }
         }
         //  If command is `history` print previous N commands
-        else if (input.compare("history") == 0)
+        else if (strcmp(hist_arg_list[0],"history") == 0 && hist_arg_list[1] == NULL) 
         {
             // copy user input to list of commands
             strcpy(command_list[size], input.c_str());
@@ -151,6 +152,7 @@ int main (int argc, char **argv)
                 bool is_character = false;
                 int arg;
                 char *i;
+                
                 for (i = hist_arg_list[1]; *i; i++)
                 {   // Attempt `argument` to integer conversion
                     try
@@ -168,14 +170,23 @@ int main (int argc, char **argv)
                 if (!is_character)
                 {   // convert to integer
                     arg = std::stoi(hist_arg_list[1]);
+                    int k;
                     // if `argument` is an integer > 0 print that many of the most recent commands
                     if (arg > 0)
                     {   // do not print the current `history` + `arg` command
-                        int i = (size - arg);
-                        while (i < size)
+                        // if arg is greater than current size print all history
+                        if (arg > size)
                         {
-                            printf("  %d: %s\n", i+1, command_list[i]);
-                            i++;
+                            k = 0;
+                        } 
+                        else
+                        {
+                            k = (size - arg);
+                        }
+                        while (k < size)
+                        {
+                            printf("  %d: %s\n", k+1, command_list[k]);
+                            k++;
                         }
                     }
                     else
@@ -186,7 +197,7 @@ int main (int argc, char **argv)
             }
         }
         //  If command is `exit` exit loop / quit program
-        else if (input.compare("exit") == 0)
+        else if (strcmp(hist_arg_list[0],"exit") == 0 && hist_arg_list[1] == NULL)
         {   // copy user input to list of commands
             strcpy(command_list[size], input.c_str());
             // write commands to history.txt before exit
