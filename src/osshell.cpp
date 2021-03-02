@@ -86,12 +86,22 @@ int main (int argc, char **argv)
         {   
             // copy user input to list of commands
             strcpy(command_list[size], input.c_str());
-            // If so, then check if command is a PATH to an executable file
-            // Run the excecutable if it is, otherwise print error
-            if (stat(input.c_str(), &sb) != -1)
+            std::string new_input = input;
+            // If input is in the form `./bin/etc...` remove the period so it can be executed
+            if (firstChar.compare(".") == 0)
             {
-                
-                splitString(input, ' ', arg_list);
+                //remove all periods from input so it can be executed
+                while (firstChar.compare(".") == 0)
+                {
+                    new_input = input.substr(1, input.length()).c_str();
+                    firstChar = new_input.substr(0, 1);
+                }
+            }
+            splitString(new_input, ' ', arg_list);
+            // Check if command is a PATH to an executable file
+            // Run the excecutable if it is, otherwise print error
+            if (stat(arg_list[0], &sb) != -1)
+            {   
                 int pid = fork();
                 //child process
                 if (pid == 0)
