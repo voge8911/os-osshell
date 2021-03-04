@@ -130,7 +130,7 @@ int main (int argc, char **argv)
                 printf("  %d: %s\n", i + 1, command_list[i]);
             }
         }
-        // If input is `history` + ` ` + `argument` check for valid argument
+        // If input is `history` + `argument` check for valid argument
         else if (strcmp(hist_arg_list[0],"history") == 0)
         {
             // If `argument` = `clear` then clear history and don't save to command list
@@ -144,7 +144,7 @@ int main (int argc, char **argv)
                 fclose(file);
                 continue;
             }
-            // If there is some other argument, check if its an integer > 0
+            // If there is some other argument, check if it is an integer > 0
             else if (1)
             {   // copy user input to list of commands
                 strcpy(command_list[size], input.c_str());
@@ -165,7 +165,7 @@ int main (int argc, char **argv)
                         break;
                     }
                 }
-                // if `argument` is not a character
+                // if `argument` is not a character it is good to convert to integer
                 if (!is_character)
                 {   // convert to integer
                     arg = std::stoi(hist_arg_list[1]);
@@ -220,6 +220,7 @@ int main (int argc, char **argv)
             char *exec;
             bool is_file = false;
             int i = 0;
+	    // loop through path list, concatinate user input to path list, check if file exists
             while (os_path_list[i] != NULL)
             {   
                 exec = new char[128];
