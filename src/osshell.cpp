@@ -31,7 +31,6 @@ int main (int argc, char **argv)
     std::vector<std::string> file_lines;
     std::string line;
     std::fstream in_file(FILE_NAME);
-    //std::ofstream out_file;
     if (!in_file)
     {
         fprintf(stderr, "Error: cannot open file \"%s\"\n", FILE_NAME);
