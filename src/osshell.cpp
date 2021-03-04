@@ -77,7 +77,7 @@ int main (int argc, char **argv)
         splitString(input, ' ',hist_arg_list);
         // store first characater of input in variable
         std::string firstChar = input.substr(0, 1);
-        //if input is nothing or just spaces reprompt user
+        //if input is nothing or only whitespace reprompt user
         if (input.empty() || hist_arg_list[0] == NULL)
         {
             continue;
